@@ -1,0 +1,16 @@
+{
+  "name": "Learning_management_System",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"pnpm -C lms-backend start\" \"pnpm -C lms-frontend dev\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.2",
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
