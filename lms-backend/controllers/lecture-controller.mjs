@@ -5,6 +5,7 @@ import {
   fetchLectures,
   removeLecture,
   summarizeLecture as summarize,
+  chatWithLecture,
 } from "../services/lecture-service.mjs";
 
 export async function getLectures(req, res) {
@@ -68,6 +69,35 @@ export async function summarizeLecture(req, res) {
         .status(500)
         .json({ message: "Unable to summarize lecture", error: error.message });
     }
+  }
+}
+
+export async function askLectureAI(req, res) {
+  try {
+    const { question } = req.body;
+
+    const result = await chatWithLecture(req.params.id, question);
+
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked");
+
+    const reader = result.textStream.getReader();
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        res.end();
+        break;
+      }
+
+      res.write(value);
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "Unable to answer question",
+      error: error.message,
+    });
   }
 }
 

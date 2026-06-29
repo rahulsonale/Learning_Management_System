@@ -35,6 +35,7 @@ export default function CreateCoursePage() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     try {
+      console.log("Selected file:", fileRef.current);
       const thumbnailFile = getFileData();
       const { msg, thumbnailUrl } =
         await uploadThumbnail(thumbnailFile).unwrap();

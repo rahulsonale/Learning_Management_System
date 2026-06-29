@@ -43,26 +43,46 @@ const upload = multer({
 
 export function handleUpload(req, res, next) {
   upload.single("thumbnail")(req, res, (error) => {
+    console.log("========== MULTER DEBUG ==========");
+    console.log("Multer Error:", error);
+    console.log("req.file:", req.file);
+    console.log("req.body:", req.body);
+    console.log("==================================");
+
     if (!error) {
       return next();
     }
+
     if (error instanceof multer.MulterError) {
       const message = {
         LIMIT_FILE_SIZE: "File cannot be greater than 5MB",
-        LIMIT_UNEXPECTED_FILE: " Invalid file type. Only images are allowed",
+        LIMIT_UNEXPECTED_FILE:
+          "Invalid file type. Only PNG, JPEG, and WEBP images are allowed",
       };
+
       return res.status(400).json({
-        error: message[error.code],
+        error: message[error.code] || error.message,
         code: error.code,
       });
     }
+
+    return res.status(500).json({
+      error: error.message,
+    });
   });
 }
 
 export async function thumbnailImage(req, res) {
-  console.log(req.file);
+  console.log("thumbnailImage req.file =", req.file);
+
+  if (!req.file) {
+    return res.status(400).json({
+      message: "No file received by backend",
+    });
+  }
+
   res.send({
-    msg: `Thumbnail uploaded successfully`,
+    msg: "Thumbnail uploaded successfully",
     thumbnailUrl: req.file.path,
   });
 }

@@ -290,7 +290,7 @@ export default function CoursePlayerPage() {
               aria-label="Lecture transcript"
             >
               <h3 className="font-semibold text-sm">Ask AI</h3>
-              <ChatSheet />
+              <ChatSheet lectureId={currentLecture?._id} />
             </section>
             <p className="text-sm text-muted-foreground self-center">
               {currentIndex + 1} of {lectures.length} lectures

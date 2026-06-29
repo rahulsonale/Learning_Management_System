@@ -107,6 +107,45 @@ export async function summary_ollama(content) {
   });
 }
 
+export async function chatWithLecture(id, question) {
+  const lecture = await Lecture.findById(id);
+
+  if (!lecture) {
+    throw new Error("Lecture not found");
+  }
+
+  const transcripts = await fetchTranscript(lecture.videoUrl);
+
+  const transcript = transcripts.reduce(
+    (prev, current) => ({
+      text: prev.text + " " + current.text,
+    }),
+    { text: "" },
+  );
+
+  return streamText({
+    model: google("gemini-2.5-flash-lite"),
+    system: `
+      You are an expert instructor.
+      Answer the student's question using the lecture transcript.
+      If the answer is not available in the transcript, clearly say so.
+      Keep answers concise and educational.
+    `,
+    messages: [
+      {
+        role: "user",
+        content: `
+Transcript:
+${transcript.text}
+
+Question:
+${question}
+        `,
+      },
+    ],
+  });
+}
+
 export async function summarizeLecture(id) {
   const lecture = await Lecture.findById(id);
   const transcripts = await fetchTranscript(lecture.videoUrl);

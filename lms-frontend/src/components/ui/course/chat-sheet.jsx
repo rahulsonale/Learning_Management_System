@@ -1,3 +1,4 @@
+import { backendURL } from "@/api/api";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,16 +16,29 @@ import { useState } from "react";
 
 import Chat from "@/components/ui/course/chat";
 
-export default function SheetSide() {
+export default function SheetSide({ lectureId }) {
   const [messages, setMessages] = useState([]);
 
-  function onNewMessage(message) {
-    // Here you would typically send the message to your backend or AI service and get a response
-    console.log("New message:", message);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { text: message, sender: "ai" },
-    ]);
+  async function onNewMessage(message) {
+    setMessages((prev) => [...prev, { text: message, sender: "user" }]);
+
+    try {
+      const res = await fetch(`${backendURL}/api/lectures/${lectureId}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: message,
+        }),
+      });
+
+      const answer = await res.text();
+
+      setMessages((prev) => [...prev, { text: answer, sender: "ai" }]);
+    } catch (error) {
+      console.error(error);
+    }
   }
   return (
     <div className="flex flex-wrap gap-2">
