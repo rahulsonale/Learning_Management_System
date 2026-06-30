@@ -79,19 +79,11 @@ function summarize_v3(content) {
 export async function fetchLectures(courseId) {
   const filter = courseId ? { course: courseId } : {};
 
-  let lectures = await Lecture.find(filter)
+  const lectures = await Lecture.find(filter)
     .populate("course", "title")
     .sort({ createdAt: 1 });
-  return Promise.all(
-    lectures.map(async (lec) => {
-      const transcripts = await fetchTranscript(lec.videoUrl);
-      const transcript = transcripts.reduce((prev, current) => ({
-        text: prev.text + " " + current.text,
-      }));
-      // const summary = await summarize_v2(transcript.text)
-      return { ...lec.toObject(), transcript };
-    }),
-  );
+
+  return lectures;
 }
 
 export async function summary_ollama(content) {
