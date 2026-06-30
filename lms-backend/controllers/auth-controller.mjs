@@ -1,10 +1,12 @@
 import { authenticateUser, createUser } from "../services/auth-service.mjs";
 
+const isProduction = process.env.SECURE === "true";
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.SECURE === "true", // true in case of https,
+  secure: isProduction, // true in case of https,
   maxAge: 24 * 60 * 60 * 1000,
-  sameSite: process.env.SECURE === "true" ? "none" : "lax",
+  sameSite: isProduction ? "none" : "lax",
 };
 
 export async function registerUser(req, res) {
