@@ -2,6 +2,7 @@ import { validateToken } from "../services/jwt-service.mjs";
 
 export default async function verfiyToken(req, res, next) {
   console.log("Cookies:", req.cookies);
+  console.log("Headers cookie:", req.headers.cookie);
 
   const token = req.cookies.token;
 
