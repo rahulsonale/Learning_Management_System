@@ -106,14 +106,22 @@ export async function chatWithLecture(id, question) {
     throw new Error("Lecture not found");
   }
 
-  const transcripts = await fetchTranscript(lecture.videoUrl);
+  let transcript = { text: "" };
 
-  const transcript = transcripts.reduce(
-    (prev, current) => ({
-      text: prev.text + " " + current.text,
-    }),
-    { text: "" },
-  );
+  try {
+    const transcripts = await fetchTranscript(lecture.videoUrl);
+
+    transcript = transcripts.reduce(
+      (prev, current) => ({
+        text: prev.text + " " + current.text,
+      }),
+      { text: "" },
+    );
+  } catch (error) {
+    throw new Error(
+      "Transcript unavailable. YouTube is blocking transcript requests.",
+    );
+  }
 
   return streamText({
     model: google("gemini-2.5-flash-lite"),
@@ -140,14 +148,32 @@ ${question}
 
 export async function summarizeLecture(id) {
   const lecture = await Lecture.findById(id);
-  const transcripts = await fetchTranscript(lecture.videoUrl);
-  console.log("Transcripts:", transcripts);
-  const transcript = transcripts.reduce((prev, current) => ({
-    text: prev.text + " " + current.text,
-    duration: prev.duration + current.duration,
-  }));
-  console.log("Transcript object:", transcript);
-  console.log("Transcript text:", transcript.text, typeof transcript.text);
+
+  if (!lecture) {
+    throw new Error("Lecture not found");
+  }
+
+  let transcript;
+
+  try {
+    const transcripts = await fetchTranscript(lecture.videoUrl);
+
+    transcript = transcripts.reduce(
+      (prev, current) => ({
+        text: prev.text + " " + current.text,
+        duration: prev.duration + current.duration,
+      }),
+      {
+        text: "",
+        duration: 0,
+      },
+    );
+  } catch (error) {
+    throw new Error(
+      "Transcript unavailable. YouTube is blocking transcript requests.",
+    );
+  }
+
   return summarize_v3(transcript.text);
 }
 
