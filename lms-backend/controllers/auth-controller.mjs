@@ -2,9 +2,9 @@ import { authenticateUser, createUser } from "../services/auth-service.mjs";
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: Boolean(process.env.SECURE), // true in case of https,
+  secure: process.env.SECURE === "true", // true in case of https,
   maxAge: 24 * 60 * 60 * 1000,
-  sameSite: Boolean(process.env.SECURE) ? "none" : "lax",
+  sameSite: process.env.SECURE === "true" ? "none" : "lax",
 };
 
 export async function registerUser(req, res) {
@@ -19,6 +19,7 @@ export async function registerUser(req, res) {
 export async function login(req, res) {
   const { error, user, token } = await authenticateUser(req.body);
   if (token) {
+    console.log("COOKIE_OPTIONS:", COOKIE_OPTIONS);
     res.cookie("token", token, COOKIE_OPTIONS);
     res.send(user);
   } else {
