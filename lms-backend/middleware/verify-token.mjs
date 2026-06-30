@@ -1,21 +1,25 @@
 import { validateToken } from "../services/jwt-service.mjs";
+
 export default async function verfiyToken(req, res, next) {
+  console.log("Cookies:", req.cookies);
+
   const token = req.cookies.token;
+
   if (!token) {
-    res.status(401).send({ message: "No token found" });
-  } else {
-    console.log("validating token");
-    try {
-      const result = await validateToken(token);
-      console.log(result);
-      if (result) {
-        req.user = { ...result, token };
-        next();
-      } else {
-        res.status(401).send({ message: "Invalid token" });
-      }
-    } catch (ex) {
-      res.status(401).send({ ex });
+    return res.status(401).send({ message: "No token found" });
+  }
+
+  try {
+    const result = await validateToken(token);
+
+    if (result) {
+      req.user = { ...result, token };
+      next();
+    } else {
+      return res.status(401).send({ message: "Invalid token" });
     }
+  } catch (ex) {
+    console.error("Token validation error:", ex);
+    return res.status(401).send({ message: "Invalid token", ex });
   }
 }

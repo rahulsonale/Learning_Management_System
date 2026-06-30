@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 export function generateToken(payload) {
   return new Promise((resolve, reject) => {
     jwt.sign(
@@ -14,16 +15,6 @@ export function generateToken(payload) {
       },
     );
   });
-}
-
-export default async function verfiyToken(req, res, next) {
-  console.log("Cookies:", req.cookies);
-
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.status(401).send({ message: "No token found" });
-  }
 }
 
 export function validateToken(token) {
