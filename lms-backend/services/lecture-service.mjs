@@ -106,41 +106,16 @@ export async function chatWithLecture(id, question) {
     throw new Error("Lecture not found");
   }
 
-  let transcript = { text: "" };
-
-  try {
-    const transcripts = await fetchTranscript(lecture.videoUrl);
-
-    transcript = transcripts.reduce(
-      (prev, current) => ({
-        text: prev.text + " " + current.text,
-      }),
-      { text: "" },
-    );
-  } catch (error) {
-    throw new Error(
-      "Transcript unavailable. YouTube is blocking transcript requests.",
-    );
-  }
-
   return streamText({
     model: google("gemini-2.5-flash-lite"),
     system: `
-      You are an expert instructor.
-      Answer the student's question using the lecture transcript.
-      If the answer is not available in the transcript, clearly say so.
-      Keep answers concise and educational.
+      You are an expert programming instructor.
+      Answer the student's question clearly and concisely.
     `,
     messages: [
       {
         role: "user",
-        content: `
-Transcript:
-${transcript.text}
-
-Question:
-${question}
-        `,
+        content: question,
       },
     ],
   });
@@ -153,28 +128,21 @@ export async function summarizeLecture(id) {
     throw new Error("Lecture not found");
   }
 
-  let transcript;
-
-  try {
-    const transcripts = await fetchTranscript(lecture.videoUrl);
-
-    transcript = transcripts.reduce(
-      (prev, current) => ({
-        text: prev.text + " " + current.text,
-        duration: prev.duration + current.duration,
-      }),
+  return streamText({
+    model: google("gemini-2.5-flash-lite"),
+    messages: [
       {
-        text: "",
-        duration: 0,
-      },
-    );
-  } catch (error) {
-    throw new Error(
-      "Transcript unavailable. YouTube is blocking transcript requests.",
-    );
-  }
+        role: "user",
+        content: `
+Summarize this lecture.
 
-  return summarize_v3(transcript.text);
+Title: ${lecture.title}
+
+Description: ${lecture.description}
+        `,
+      },
+    ],
+  });
 }
 
 export async function fetchLectureById(id) {
